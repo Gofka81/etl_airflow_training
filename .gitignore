@@ -1,0 +1,6 @@
+logs
+
+*.pyc
+*.log
+.env
+/flight_radar_api/.fr24_env

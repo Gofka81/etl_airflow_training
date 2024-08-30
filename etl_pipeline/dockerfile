@@ -1,0 +1,20 @@
+# Use the official Spark image
+FROM docker.io/bitnami/spark:3.5
+
+# Set environment variables
+ENV SPARK_HOME=/opt/bitnami/spark
+ENV PATH="${SPARK_HOME}/bin:${PATH}"
+
+# Install Python and pip
+USER root
+RUN apt-get update && \
+    apt-get install -y python3 python3-pip
+
+# Install any additional Python packages
+RUN pip3 install requests boto3  # Example package
+
+# Set the working directory
+WORKDIR /opt/bitnami/spark/jobs
+
+# Copy any additional scripts or configuration files into the container
+COPY . /opt/bitnami/spark/scripts/
