@@ -40,7 +40,7 @@ with DAG(
         params=extract_route
 ) as dag:
 
-    extract_flights_task = FlightRadarOperator(
+    extract_task = FlightRadarOperator(
         task_id='extract_flights',
         route=extract_route["route"],
         src_bucket=TEMP_MINIO_BUCKET,
@@ -56,7 +56,7 @@ with DAG(
 
     etl_transform = SparkSubmitOperator(
         task_id=f'etl_{extract_route["name"]}_transform',
-        application='/opt/bitnami/spark/jobs/transform/etl_flights_transform.py',
+        application='/opt/bitnami/spark/jobs/src/transform/etl_flights_transform.py',
         name='pyspark_job_name',
         conn_id='spark_default',
         jars='/opt/bitnami/spark/jars/hadoop-aws-3.3.4.jar,/opt/bitnami/spark/jars/aws-java-sdk-bundle-1.12.262.jar',
@@ -69,7 +69,8 @@ with DAG(
             'spark.hadoop.fs.s3a.path.style.access': 'true'
         },
         application_args=[f"s3a://{TEMP_MINIO_BUCKET}/{TEMP_BUCKET_KEY}",
-                          f"s3a://{TRANSFORM_MINIO_BUCKET}/{TRANSFORM_BUCKET_KEY}"]
+                          f"s3a://{TRANSFORM_MINIO_BUCKET}/{TRANSFORM_BUCKET_KEY}",
+                          '{{ execution_date.timestamp() }}']
     )
 
     load_postgres = PythonOperator(
@@ -86,4 +87,4 @@ with DAG(
     )
 
 
-extract_flights_task >> sensor_extract >> etl_transform >> load_postgres
+extract_task >> sensor_extract >> etl_transform >> load_postgres

@@ -23,25 +23,25 @@ default_args = {
 }
 
 extract_route = {
-    "name": "airlines",
-    "route": "airlines"
+    "name": "airports",
+    "route": "airports"
 }
 
 
 # Define the DAG
 with DAG(
-        dag_id='pipeline_airlines_extract',
+        dag_id='pipeline_airports_extract',
         default_args=default_args,
-        description='Extract airlines data',
+        description='Extract airports data',
         schedule_interval='@monthly',
         start_date=datetime(2023, 8, 30),
         catchup=False,
-        tags=['etl', 'airlines'],
+        tags=['etl', 'airports'],
         params=extract_route
 ) as dag:
 
     extract_task = FlightRadarOperator(
-        task_id='extract_airlines',
+        task_id='extract_airports',
         route=extract_route["route"],
         src_bucket=TEMP_MINIO_BUCKET,
         dag=dag
@@ -56,7 +56,7 @@ with DAG(
 
     etl_transform = SparkSubmitOperator(
         task_id=f'etl_{extract_route["name"]}_transform',
-        application='/opt/bitnami/spark/jobs/src/transform/etl_airlines_transform.py',
+        application='/opt/bitnami/spark/jobs/src/transform/etl_airports_transform.py',
         name='pyspark_job_name',
         conn_id='spark_default',
         jars='/opt/bitnami/spark/jars/hadoop-aws-3.3.4.jar,/opt/bitnami/spark/jars/aws-java-sdk-bundle-1.12.262.jar',
@@ -80,7 +80,7 @@ with DAG(
             'bucket_name': TRANSFORM_MINIO_BUCKET,
             's3_key': TRANSFORM_BUCKET_KEY,
             'postgres_conn_id': 'postgres_default',
-            'table_name': 'airline_info',
+            'table_name': 'airport_info',
             'if_exists': 'replace'  # Optional: 'replace', 'append', or 'fail'
         }
     )
