@@ -6,7 +6,7 @@ from custom_operators.flight_radar_operator import FlightRadarOperator
 from airflow.operators.python import PythonOperator
 from airflow.providers.amazon.aws.sensors.s3 import S3KeySensor
 from airflow.providers.apache.spark.operators.spark_submit import SparkSubmitOperator
-from utils.s3_utils import load_parquet_to_postgres
+from utils.s3_utils import load_parquet_to_postgres, check_and_delete_s3_file
 
 
 TEMP_MINIO_BUCKET = os.getenv("TEMP_MINIO_BUCKET")
@@ -54,6 +54,16 @@ with DAG(
         aws_conn_id="minio_s3"
     )
 
+    check_and_delete_s3_file = PythonOperator(
+        task_id='check_and_delete_s3_file',
+        python_callable=check_and_delete_s3_file,
+        op_kwargs={
+            'aws_conn_id': 'minio_s3',
+            'bucket_name': TRANSFORM_MINIO_BUCKET,
+            's3_key': TRANSFORM_BUCKET_KEY,
+        }
+    )
+
     etl_transform = SparkSubmitOperator(
         task_id=f'etl_{extract_route["name"]}_transform',
         application='/opt/bitnami/spark/jobs/src/transform/etl_airports_transform.py',
@@ -86,4 +96,4 @@ with DAG(
     )
 
 
-extract_task >> sensor_extract >> etl_transform >> load_postgres
+extract_task >> [sensor_extract, check_and_delete_s3_file] >> etl_transform >> load_postgres

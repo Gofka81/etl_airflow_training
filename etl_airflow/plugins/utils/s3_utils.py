@@ -42,3 +42,13 @@ def load_parquet_to_postgres(**kwargs):
 
     # Load the DataFrame into PostgreSQL
     combined_df.to_sql(table_name, engine, if_exists=if_exists, index=False)
+
+
+def check_and_delete_s3_file(**kwargs):
+    aws_conn_id = kwargs['aws_conn_id']
+    bucket_name = kwargs['bucket_name']
+    s3_key = kwargs['s3_key']
+    s3_hook = S3Hook(aws_conn_id=aws_conn_id)
+    for file in s3_hook.list_keys(bucket_name=bucket_name, prefix=s3_key):
+        s3_hook.delete_objects(bucket=bucket_name, keys=file)
+        print(f'Deleted: {file}')
