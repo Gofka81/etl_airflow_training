@@ -97,6 +97,24 @@ services:
       - minio_config:/root/.minio # Persistent configuration storage
     command: server /data --console-address ":9001"
 
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_DATABASE_TYPE=postgres
+      - GF_DATABASE_HOST=postgres:5432
+      - GF_DATABASE_NAME=etl_training
+      - GF_DATABASE_USER=airflow
+      - GF_DATABASE_PASSWORD=airflow
+    volumes:
+      - grafana_data:/var/lib/grafana
+    depends_on:
+      - postgres
+
   flight_radar_api:
     build:
       context: ./flight_radar_api
@@ -235,3 +253,4 @@ volumes:
   minio_data:
   minio_config:
   shared_spark_volume:
+  grafana_data:

@@ -14,8 +14,8 @@ TRANSFORM_MINIO_BUCKET = os.getenv("TRANSFORM_MINIO_BUCKET")
 MINIO_ENDPOINT_URL = os.getenv("MINIO_ENDPOINT_URL")
 MINIO_ACCESS_KEY_ID = os.getenv("MINIO_ACCESS_KEY_ID")
 MINIO_SECRET_ACCESS_KEY = os.getenv("MINIO_SECRET_ACCESS_KEY")
-TEMP_BUCKET_KEY = '{{dag.dag_id}}/timestamp={{ execution_date.strftime("%m-%d-%Y_%H:%M:%S") }}/{{dag.params.name}}.json'
-TRANSFORM_BUCKET_KEY = '{{dag.dag_id}}/timestamp={{ execution_date.strftime("%m-%d-%Y_%H:%M:%S") }}'
+TEMP_BUCKET_KEY = '{{dag.dag_id}}/timestamp={{ execution_date.strftime("%Y-%m-%d_%H:%M:%S") }}/{{dag.params.name}}.json'
+TRANSFORM_BUCKET_KEY = '{{dag.dag_id}}/timestamp={{ execution_date.strftime("%Y-%m-%d_%H:%M:%S") }}'
 
 default_args = {
     'owner': 'airflow',

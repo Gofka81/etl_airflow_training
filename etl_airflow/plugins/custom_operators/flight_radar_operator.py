@@ -40,7 +40,7 @@ class FlightRadarOperator(BaseOperator):
         return data
 
     def store_data_to_s3(self, data: list, context):
-        formatted_date = context['logical_date'].strftime("%m-%d-%Y_%H:%M:%S")
+        formatted_date = context['logical_date'].strftime("%Y-%m-%d_%H:%M:%S")
         dag_name = context["dag"].dag_id
         try:
             s3_client = boto3.client(

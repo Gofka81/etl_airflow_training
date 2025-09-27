@@ -1,12 +1,13 @@
 import sys
 sys.path.append('/opt/bitnami/spark/jobs')
+import datetime
 
 from pyspark.sql import SparkSession
 from pyspark.sql import DataFrame
-from pyspark.sql.functions import col, lit, unix_timestamp
+from pyspark.sql.functions import explode, col, lit, unix_timestamp
 
-from src.utils.etl_transform import EtlTransform
-from src.utils.schema import flights_schema
+from etl_pipeline.src.utils.etl_transform import EtlTransform
+from etl_pipeline.src.utils.schema import flights_schema
 
 
 class EtlFlightsTransform(EtlTransform):
@@ -15,20 +16,16 @@ class EtlFlightsTransform(EtlTransform):
         self.execution_date = execution_date
 
     def transform(self, df: DataFrame) -> DataFrame:
-        new_df = (df.withColumn('timestamp', unix_timestamp(lit(self.execution_date)))
-                  .select("timestamp", "latitude", "longitude", "id", "icao_24bit", "heading", "altitude",
-                          "ground_speed", "squawk", "aircraft_code", "registration", "origin_airport_iata",
-                          "destination_airport_iata", "number", "airline_iata", "on_ground", "vertical_speed",
-                          "callsign", "airline_icao")
-                  )
+        new_df = df.withColumn('timestamp', unix_timestamp(lit(self.execution_date))).drop('time')
         new_df.show()
         return new_df
 
 
 def main():
-    input_path = sys.argv[1]
-    output_path = sys.argv[2]
-    execution_date = sys.argv[3]
+    input_path = '/Users/lantonyk/Developer/DataEng/POC project/etl_airflow_training/flights.json'
+    output_path = 'test-result'
+    execution_date = '2024-09-09 16:28:09'
+    print(execution_date)
 
     # Initialize Spark session
     spark = SparkSession.builder \

@@ -52,8 +52,12 @@ def get_flight_details(flight_id: str):
 @app.get("/airports")
 def get_airports():
     try:
+        res = []
         airports = flightradar_api.get_airports()
-        return airports
+
+        for airport in airports:
+            res.append(flightradar_api.get_airport(airport.icao, details=True))
+        return res
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
